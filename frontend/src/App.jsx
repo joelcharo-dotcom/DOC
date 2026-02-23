@@ -17,14 +17,16 @@ import Notas from './pages/Notas';
 import NotaForm from './pages/NotaForm';
 import Facturas from './pages/Facturas';
 import FacturaForm from './pages/FacturaForm';
+import FormulaExterna from './pages/FormulaExterna';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Ruta pública */}
+          {/* Rutas públicas */}
           <Route path="/login" element={<Login />} />
+          <Route path="/formula-externa" element={<FormulaExterna />} />
 
           {/* Rutas protegidas */}
           <Route

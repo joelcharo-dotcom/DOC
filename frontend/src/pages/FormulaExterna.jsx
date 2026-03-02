@@ -7,11 +7,11 @@ export default function FormulaExterna() {
   const [direccion, setDireccion] = useState('');
   const [telefono, setTelefono] = useState('');
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
-  const [items, setItems] = useState([{ nombre: '', cantidad: 1, unidad: 'FRASCOS' }]);
+  const [items, setItems] = useState([{ nombre: '', cantidad: 1, unidad: '' }]);
   const printRef = useRef();
 
   const addItem = () => {
-    setItems([...items, { nombre: '', cantidad: 1, unidad: 'FRASCOS' }]);
+    setItems([...items, { nombre: '', cantidad: 1, unidad: '' }]);
   };
 
   const removeItem = (index) => {
@@ -31,7 +31,7 @@ export default function FormulaExterna() {
     setDireccion('');
     setTelefono('');
     setFecha(new Date().toISOString().split('T')[0]);
-    setItems([{ nombre: '', cantidad: 1, unidad: 'FRASCOS' }]);
+    setItems([{ nombre: '', cantidad: 1, unidad: '' }]);
   };
 
   const formatDate = (date) => {
@@ -166,20 +166,13 @@ export default function FormulaExterna() {
                 />
               </div>
               <div className="w-32">
-                <select
+                <input
+                  type="text"
                   value={item.unidad}
                   onChange={(e) => updateItem(index, 'unidad', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                >
-                  <option value="FRASCOS">FRASCOS</option>
-                  <option value="JERINGAS">JERINGAS</option>
-                  <option value="CAJAS">CAJAS</option>
-                  <option value="SOBRES">SOBRES</option>
-                  <option value="TABLETAS">TABLETAS</option>
-                  <option value="UNIDADES">UNIDADES</option>
-                  <option value="ML">ML</option>
-                  <option value="GR">GR</option>
-                </select>
+                  placeholder="Ej: Frascos"
+                />
               </div>
               <button
                 type="button"
@@ -284,7 +277,7 @@ export default function FormulaExterna() {
                       {item.nombre}
                     </td>
                     <td style={{ border: '1px solid #999', padding: '8px', textAlign: 'center', fontSize: '11px' }}>
-                      {item.cantidad} {item.unidad || 'FRASCOS'}
+                      {item.cantidad}{item.unidad ? ` ${item.unidad}` : ''}
                     </td>
                   </tr>
                 ))}

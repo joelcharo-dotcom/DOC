@@ -11,7 +11,8 @@ import {
   X,
   Stethoscope,
   Settings,
-  Receipt
+  Receipt,
+  Wallet
 } from 'lucide-react';
 import { useState } from 'react';
 import ConfiguracionUsuarios from './ConfiguracionUsuarios';
@@ -33,6 +34,7 @@ export default function Layout({ children }) {
     { path: '/historias', icon: FileText, label: 'Historias' },
     { path: '/formulas', icon: ClipboardList, label: 'Fórmulas' },
     { path: '/facturas', icon: Receipt, label: 'Facturas' },
+    { path: '/contabilidad', icon: Wallet, label: 'Contabilidad' },
     { path: '/notas', icon: StickyNote, label: 'Notas' },
   ];
 

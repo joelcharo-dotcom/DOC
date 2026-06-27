@@ -105,6 +105,15 @@ model FacturaItem {
   facturaId      Int
   factura        Factura @relation(fields: [facturaId], references: [id], onDelete: Cascade)
 }
+model MovimientoContable {
+  id          Int      @id @default(autoincrement())
+  fecha       DateTime @default(now())
+  descripcion String
+  tipo        String
+  monto       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
 model MovimientoContable {
   id          Int      @id @default(autoincrement())

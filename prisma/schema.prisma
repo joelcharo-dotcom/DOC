@@ -4,123 +4,144 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 model Usuario {
-  id        Int      @id @default(autoincrement())
-  usuario   String   @unique
-  password  String
-  nombre    String
+  id Int @id @default(autoincrement())
+  usuario String @unique
+  password String
+  nombre String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Cliente {
-  id        Int        @id @default(autoincrement())
-  nombre    String
-  cedula    String     @unique
-  telefono  String?
+  id Int @id @default(autoincrement())
+  nombre String
+  cedula String @unique
+  telefono String?
   direccion String?
-  foto      String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  formulas  Formula[]
+  foto String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  formulas Formula[]
   historias Historia[]
-  facturas  Factura[]
+  facturas Factura[]
 }
 
 model Historia {
-  id            Int       @id @default(autoincrement())
-  fecha         DateTime  @default(now())
+  id Int @id @default(autoincrement())
+  fecha DateTime @default(now())
+  clienteId Int
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  examenes Examen[]
   observaciones String
-  valor         Float?
-  tipoPago      String    @default("pago")
-  referido      String?
-  clienteId     Int
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  cliente       Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  examenes      Examen[]
+  valor Float?
+  tipoPago String? @default("pago")
+  referido String?
+  edad Int?
+  diagnostico String?
+  presionSistolica String?
+  presionDiastolica String?
+  temperatura String?
+  frecuenciaCardiaca String?
+  sistemas Json?
+  tipoPaciente String?
+  acompanante String?
+  acompananteTelefono String?
+  actitudPaciente String?
+  notasMedico String?
+  proximaCita DateTime?
+  tipoAtencion String?
+  formaPago String?
+  valorConsulta Float?
+  valorMedicamentos Float?
+  detalleMedicamentos String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Examen {
-  id         Int      @id @default(autoincrement())
-  nombre     String   @default("Examen")
-  imagen     String   // Base64 de la imagen
+  id Int @id @default(autoincrement())
+  nombre String @default("Examen")
+  imagen String
   historiaId Int
-  createdAt  DateTime @default(now())
-  historia   Historia @relation(fields: [historiaId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  historia Historia @relation(fields: [historiaId], references: [id], onDelete: Cascade)
 }
 
 model Formula {
-  id        Int           @id @default(autoincrement())
-  fecha     DateTime      @default(now())
+  id Int @id @default(autoincrement())
+  fecha DateTime @default(now())
   clienteId Int
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  cliente   Cliente       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  items     FormulaItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  items FormulaItem[]
 }
 
 model FormulaItem {
-  id        Int     @id @default(autoincrement())
-  nombre    String
-  cantidad  Int
-  unidad    String  @default("FRASCOS")
+  id Int @id @default(autoincrement())
+  nombre String
+  cantidad Int
+  unidad String @default("FRASCOS")
   formulaId Int
-  formula   Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
+  formula Formula @relation(fields: [formulaId], references: [id], onDelete: Cascade)
 }
 
 model Nota {
-  id        Int      @id @default(autoincrement())
-  fecha     DateTime
-  hora      String
+  id Int @id @default(autoincrement())
+  fecha DateTime
+  hora String
   contenido String
-  estado    String   @default("abierta")
+  estado String @default("abierta")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Factura {
-  id          Int           @id @default(autoincrement())
-  numero      Int           @unique
-  fecha       DateTime      @default(now())
+  id Int @id @default(autoincrement())
+  numero Int @unique
+  fecha DateTime @default(now())
   vencimiento DateTime?
-  clienteId   Int
-  total       Float         @default(0)
-  saldo       Float         @default(0)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  cliente     Cliente       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  items       FacturaItem[]
+  clienteId Int
+  total Float @default(0)
+  saldo Float @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  items FacturaItem[]
 }
 
 model FacturaItem {
-  id             Int     @id @default(autoincrement())
-  cantidad       Int
-  descripcion    String
-  precioUnitario Float
-  total          Float
-  facturaId      Int
-  factura        Factura @relation(fields: [facturaId], references: [id], onDelete: Cascade)
-}
-model MovimientoContable {
-  id          Int      @id @default(autoincrement())
-  fecha       DateTime @default(now())
+  id Int @id @default(autoincrement())
+  cantidad Int
   descripcion String
-  tipo        String
-  monto       Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  precioUnitario Float
+  total Float
+  facturaId Int
+  factura Factura @relation(fields: [facturaId], references: [id], onDelete: Cascade)
 }
 
 model MovimientoContable {
-  id          Int      @id @default(autoincrement())
-  fecha       DateTime @default(now())
+  id Int @id @default(autoincrement())
+  fecha DateTime @default(now())
   descripcion String
-  tipo        String
-  monto       Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  tipo String
+  monto Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cita {
+  id Int @id @default(autoincrement())
+  fecha DateTime
+  hora String
+  nombre String
+  cedula String?
+  celular String
+  motivo String?
+  estado String @default("ocupada")
+  createdAt DateTime @default(now())
 }

@@ -1,18 +1,19 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Home, 
-  Users, 
-  FileText, 
-  ClipboardList, 
-  StickyNote, 
+import {
+  Home,
+  Users,
+  FileText,
+  ClipboardList,
+  StickyNote,
   LogOut,
   Menu,
   X,
   Stethoscope,
   Settings,
   Receipt,
-  Wallet
+  Wallet,
+  Calendar,
 } from 'lucide-react';
 import { useState } from 'react';
 import ConfiguracionUsuarios from './ConfiguracionUsuarios';
@@ -33,6 +34,7 @@ export default function Layout({ children }) {
     { path: '/clientes', icon: Users, label: 'Clientes' },
     { path: '/historias', icon: FileText, label: 'Historias' },
     { path: '/formulas', icon: ClipboardList, label: 'Fórmulas' },
+    { path: '/citas', icon: Calendar, label: 'Citas' },
     { path: '/facturas', icon: Receipt, label: 'Facturas' },
     { path: '/contabilidad', icon: Wallet, label: 'Contabilidad' },
     { path: '/notas', icon: StickyNote, label: 'Notas' },
@@ -44,7 +46,7 @@ export default function Layout({ children }) {
       <header className="bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-lg fixed w-full z-50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden p-2 hover:bg-blue-700 rounded-lg transition-colors"
             >
@@ -55,17 +57,17 @@ export default function Layout({ children }) {
               <span className="text-xl font-bold hidden sm:block">FUNDAMUFA</span>
             </div>
           </div>
-          
+
           {/* Navigation Links - Desktop */}
           <nav className="hidden lg:flex items-center gap-1">
-            {menuItems.map(item => (
+            {menuItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
                   `px-4 py-2 rounded-lg font-medium transition-colors ${
-                    isActive 
-                      ? 'bg-white text-blue-800' 
+                    isActive
+                      ? 'bg-white text-blue-800'
                       : 'hover:bg-blue-700 text-white'
                   }`
                 }
@@ -100,13 +102,13 @@ export default function Layout({ children }) {
       {/* Sidebar Mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div 
-            className="fixed inset-0 bg-black/50" 
+          <div
+            className="fixed inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           ></div>
           <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-xl pt-16">
             <nav className="p-4 space-y-2">
-              {menuItems.map(item => (
+              {menuItems.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
@@ -127,7 +129,7 @@ export default function Layout({ children }) {
       {/* Sidebar Desktop */}
       <aside className="hidden lg:block fixed left-0 top-14 h-full w-56 bg-white shadow-lg pt-4">
         <nav className="p-4 space-y-2">
-          {menuItems.map(item => (
+          {menuItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

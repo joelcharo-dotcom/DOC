@@ -71,24 +71,38 @@ app.put('/api/auth/usuarios/:id', async (req, res) => { try { const { id } = req
 app.put('/api/auth/usuarios/:id/password', async (req, res) => { try { const { id } = req.params; const { passwordActual, passwordNueva } = req.body; if (!passwordNueva) return res.status(400).json({ error: 'La nueva contraseña es requerida' }); const user = await prisma.usuario.findUnique({ where: { id: parseInt(id) } }); if (!user) return res.status(404).json({ error: 'Usuario no encontrado' }); if (passwordActual) { const validPassword = await bcrypt.compare(passwordActual, user.password); if (!validPassword) return res.status(401).json({ error: 'Contraseña actual incorrecta' }); } const hashedPassword = await bcrypt.hash(passwordNueva, 10); await prisma.usuario.update({ where: { id: parseInt(id) }, data: { password: hashedPassword } }); res.json({ message: 'Contraseña actualizada correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al cambiar contraseña' }); } });
 app.delete('/api/auth/usuarios/:id', async (req, res) => { try { const count = await prisma.usuario.count(); if (count <= 1) return res.status(400).json({ error: 'No se puede eliminar el único usuario del sistema' }); await prisma.usuario.delete({ where: { id: parseInt(req.params.id) } }); res.json({ message: 'Usuario eliminado correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al eliminar usuario' }); } });
 // RESET TEMPORAL - BORRAR DESPUES
-app.get('/api/reset-admin-temp-12345', async (req, res) => {
+// FIX DB TEMPORAL - BORRAR DESPUES
+app.get('/api/fix-db-temp-12345', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    let usuario = await prisma.usuario.findUnique({ where: { usuario: 'admin' } });
-    if (usuario) {
-      usuario = await prisma.usuario.update({
-        where: { usuario: 'admin' },
-        data: { password: hashedPassword, nombre: 'Admin' }
-      });
-    } else {
-      usuario = await prisma.usuario.create({
-        data: { usuario: 'admin', password: hashedPassword, nombre: 'Admin' }
-      });
+    const sqls = [
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "edad" INTEGER`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "tipoPago" TEXT DEFAULT 'pago'`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "referido" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "diagnostico" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "presionSistolica" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "presionDiastolica" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "temperatura" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "frecuenciaCardiaca" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "sistemas" JSONB`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "tipoPaciente" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "acompanante" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "acompananteTelefono" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "actitudPaciente" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "notasMedico" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "proximaCita" TIMESTAMP(3)`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "tipoAtencion" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "formaPago" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "valorConsulta" DOUBLE PRECISION`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "valorMedicamentos" DOUBLE PRECISION`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "detalleMedicamentos" TEXT`,
+      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "valor" DOUBLE PRECISION`
+    ];
+    for (const s of sqls) {
+      await prisma.$executeRawUnsafe(s);
     }
-    res.json({ ok: true, mensaje: 'Admin reseteado', usuario: usuario.usuario });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    res.json({ ok: true, mensaje: "Base de datos arreglada, ya puede guardar historias" });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 // CLIENTES

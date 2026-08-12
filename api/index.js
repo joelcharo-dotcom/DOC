@@ -29,7 +29,7 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// AUTH ROUTES (igual)
+// AUTH
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { usuario, password, nombre } = req.body;
@@ -78,7 +78,7 @@ app.post('/api/clientes', authMiddleware, upload.single('foto'), async (req, res
 app.put('/api/clientes/:id', authMiddleware, upload.single('foto'), async (req, res) => { try { const cliente = await prisma.cliente.update({ where: { id: parseInt(req.params.id) }, data: { nombre: req.body.nombre, cedula: req.body.cedula, telefono: req.body.telefono, direccion: req.body.direccion } }); res.json(cliente); } catch (e) { res.status(500).json({ error: 'Error al actualizar cliente' }); } });
 app.delete('/api/clientes/:id', authMiddleware, async (req, res) => { try { await prisma.cliente.delete({ where: { id: parseInt(req.params.id) } }); res.json({ message: 'Cliente eliminado correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al eliminar cliente' }); } });
 
-// ============ HISTORIAS - ARREGLADO PARA FUNDAMUFA ============
+// HISTORIAS - VERSION SIMPLE QUE SI FUNCIONA
 app.get('/api/historias', authMiddleware, async (req, res) => {
   try {
     const { search, clienteId } = req.query;
@@ -87,7 +87,6 @@ app.get('/api/historias', authMiddleware, async (req, res) => {
     if (search) {
       where.OR = [
         { observaciones: { contains: search, mode: 'insensitive' } },
-        { diagnostico: { contains: search, mode: 'insensitive' } },
         { cliente: { nombre: { contains: search, mode: 'insensitive' } } },
         { cliente: { cedula: { contains: search, mode: 'insensitive' } } }
       ];
@@ -112,138 +111,66 @@ app.get('/api/historias/:id', authMiddleware, async (req, res) => {
   } catch (error) { console.error(error); res.status(500).json({ error: 'Error al obtener historia' }); }
 });
 
-// POST ARREGLADO - ACEPTA CONSULTAS Y HISTORIAS
+// ESTE ES EL FIX SIMPLE
 app.post('/api/historias', authMiddleware, async (req, res) => {
   try {
     const body = req.body;
-    console.log("=== NUEVA HISTORIA/CONSULTA ===", body);
-
-    if (!body.clienteId) {
-      return res.status(400).json({ error: 'Cliente es requerido' });
-    }
+    console.log("Intentando guardar historia:", body);
 
     const clienteId = parseInt(body.clienteId);
-    
-    // FIX PRINCIPAL: observaciones ya no es obligatorio, tomamos cualquier campo
-    let observaciones = body.observaciones;
-    if (!observaciones || observaciones.trim() === '') {
-      observaciones = body.diagnostico || body.notasMedico || body.detalleMedicamentos || body.motivo || "Consulta FUNDAMUFA - Dr. Jorge Charrasquiel";
-    }
+    if (!clienteId) return res.status(400).json({ error: 'Falta paciente' });
 
-    const data = {
-      clienteId: clienteId,
-      observaciones: observaciones,
-      fecha: body.fecha ? new Date(body.fecha) : new Date(),
-      valor: body.valor ? parseFloat(body.valor) : body.valorConsulta ? parseFloat(body.valorConsulta) : null,
-      tipoPago: body.tipoPago || body.formaPago || "pago",
-      referido: body.referido || null,
-      // Campos extendidos FUNDAMUFA
-      edad: body.edad ? parseInt(body.edad) : null,
-      diagnostico: body.diagnostico || null,
-      presionSistolica: body.presionSistolica ? String(body.presionSistolica) : null,
-      presionDiastolica: body.presionDiastolica ? String(body.presionDiastolica) : null,
-      temperatura: body.temperatura ? String(body.temperatura) : null,
-      frecuenciaCardiaca: body.frecuenciaCardiaca ? String(body.frecuenciaCardiaca) : null,
-      sistemas: body.sistemas || null,
-      tipoPaciente: body.tipoPaciente || null,
-      acompanante: body.acompanante || null,
-      acompananteTelefono: body.acompananteTelefono || null,
-      actitudPaciente: body.actitudPaciente || null,
-      notasMedico: body.notasMedico || null,
-      proximaCita: body.proximaCita ? new Date(body.proximaCita) : null,
-      tipoAtencion: body.tipoAtencion || null,
-      formaPago: body.formaPago || null,
-      valorConsulta: body.valorConsulta ? parseFloat(body.valorConsulta) : null,
-      valorMedicamentos: body.valorMedicamentos ? parseFloat(body.valorMedicamentos) : null,
-      detalleMedicamentos: body.detalleMedicamentos || null,
-    };
+    let observaciones = (body.observaciones || '').toString().trim();
+    if (!observaciones) observaciones = "Consulta FUNDAMUFA - Dr. Jorge";
 
     const historia = await prisma.historia.create({
-      data: data,
-      include: { cliente: true, examenes: true }
-    });
-
-    // Guardar examenes si vienen
-    if (body.examenes && Array.isArray(body.examenes) && body.examenes.length > 0) {
-      for (const examen of body.examenes) {
-        if (examen.imagen) {
-          await prisma.examen.create({
-            data: {
-              nombre: examen.nombre || 'Examen',
-              imagen: examen.imagen,
-              historiaId: historia.id
-            }
-          });
-        }
-      }
-      const historiaConExamenes = await prisma.historia.findUnique({
-        where: { id: historia.id },
-        include: { cliente: true, examenes: true }
-      });
-      console.log("Historia guardada con examenes ID:", historia.id);
-      return res.status(201).json(historiaConExamenes);
-    }
-
-    console.log("Historia guardada OK ID:", historia.id);
-    res.status(201).json(historia);
-  } catch (error) {
-    console.error("ERROR AL CREAR HISTORIA:", error);
-    res.status(500).json({ error: 'Error al crear historia', details: error.message });
-  }
-});
-
-app.put('/api/historias/:id', authMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const body = req.body;
-
-    let observaciones = body.observaciones;
-    if (!observaciones || observaciones.trim() === '') {
-      observaciones = body.diagnostico || body.notasMedico || "Consulta FUNDAMUFA";
-    }
-
-    const historia = await prisma.historia.update({
-      where: { id: parseInt(id) },
       data: {
+        clienteId: clienteId,
         observaciones: observaciones,
-        valor: body.valor ? parseFloat(body.valor) : body.valorConsulta ? parseFloat(body.valorConsulta) : null,
-        tipoPago: body.tipoPago || body.formaPago || "pago",
+        valor: body.valor ? parseFloat(body.valor) : 0,
+        tipoPago: body.tipoPago || "pago",
         referido: body.referido || null,
-        fecha: body.fecha ? new Date(body.fecha) : undefined,
-        edad: body.edad ? parseInt(body.edad) : null,
-        diagnostico: body.diagnostico || null,
-        presionSistolica: body.presionSistolica ? String(body.presionSistolica) : null,
-        presionDiastolica: body.presionDiastolica ? String(body.presionDiastolica) : null,
-        temperatura: body.temperatura ? String(body.temperatura) : null,
-        frecuenciaCardiaca: body.frecuenciaCardiaca ? String(body.frecuenciaCardiaca) : null,
-        sistemas: body.sistemas || null,
-        tipoPaciente: body.tipoPaciente || null,
-        acompanante: body.acompanante || null,
-        acompananteTelefono: body.acompananteTelefono || null,
-        actitudPaciente: body.actitudPaciente || null,
-        notasMedico: body.notasMedico || null,
-        proximaCita: body.proximaCita ? new Date(body.proximaCita) : null,
-        tipoAtencion: body.tipoAtencion || null,
-        formaPago: body.formaPago || null,
-        valorConsulta: body.valorConsulta ? parseFloat(body.valorConsulta) : null,
-        valorMedicamentos: body.valorMedicamentos ? parseFloat(body.valorMedicamentos) : null,
-        detalleMedicamentos: body.detalleMedicamentos || null,
+        fecha: body.fecha ? new Date(body.fecha) : new Date()
       },
       include: { cliente: true, examenes: true }
     });
 
     if (body.examenes && body.examenes.length > 0) {
-      for (const examen of body.examenes) {
-        if (!examen.id && examen.imagen) {
+      for (const ex of body.examenes) {
+        if (ex.imagen) {
           await prisma.examen.create({
-            data: { nombre: examen.nombre || 'Examen', imagen: examen.imagen, historiaId: historia.id }
+            data: { nombre: ex.nombre || 'Examen', imagen: ex.imagen, historiaId: historia.id }
           });
         }
       }
-      const actualizada = await prisma.historia.findUnique({ where: { id: historia.id }, include: { cliente: true, examenes: true } });
-      return res.json(actualizada);
     }
 
+    console.log("HISTORIA GUARDADA OK:", historia.id);
+    return res.status(201).json(historia);
+
+  } catch (error) {
+    console.error("ERROR REAL:", error.message);
+    return res.status(500).json({ error: 'Error al crear historia', details: error.message });
+  }
+});
+
+app.put('/api/historias/:id', authMiddleware, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const body = req.body;
+    let observaciones = (body.observaciones || '').toString().trim();
+    if (!observaciones) observaciones = "Consulta FUNDAMUFA";
+    const historia = await prisma.historia.update({
+      where: { id },
+      data: {
+        observaciones: observaciones,
+        valor: body.valor ? parseFloat(body.valor) : 0,
+        tipoPago: body.tipoPago || "pago",
+        referido: body.referido || null,
+        fecha: body.fecha ? new Date(body.fecha) : undefined
+      },
+      include: { cliente: true, examenes: true }
+    });
     res.json(historia);
   } catch (error) { console.error(error); res.status(500).json({ error: 'Error al actualizar historia', details: error.message }); }
 });
@@ -287,12 +214,9 @@ app.put('/api/notas/:id', authMiddleware, async (req, res) => { try { const nota
 app.patch('/api/notas/:id/estado', authMiddleware, async (req, res) => { try { if (!['abierta', 'cerrada'].includes(req.body.estado)) return res.status(400).json({ error: 'Estado inválido' }); const nota = await prisma.nota.update({ where: { id: parseInt(req.params.id) }, data: { estado: req.body.estado } }); res.json(nota); } catch (e) { res.status(500).json({ error: 'Error al cambiar estado de nota' }); } });
 app.delete('/api/notas/:id', authMiddleware, async (req, res) => { try { await prisma.nota.delete({ where: { id: parseInt(req.params.id) } }); res.json({ message: 'Nota eliminada correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al eliminar nota' }); } });
 
-// CITAS - AGREGADO PARA QUE NO FALLE
+// CITAS
 app.get('/api/citas', authMiddleware, async (req, res) => {
-  try {
-    const citas = await prisma.cita.findMany({ orderBy: [{ fecha: 'asc' }, { hora: 'asc' }] });
-    res.json(citas);
-  } catch (e) { console.error(e); res.status(500).json({ error: 'Error al obtener citas' }); }
+  try { const citas = await prisma.cita.findMany({ orderBy: [{ fecha: 'asc' }, { hora: 'asc' }] }); res.json(citas); } catch (e) { console.error(e); res.status(500).json({ error: 'Error al obtener citas' }); }
 });
 app.post('/api/citas', async (req, res) => {
   try {
@@ -341,6 +265,6 @@ app.post('/api/citas-publicas', async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'Error al agendar', details: e.message }); }
 });
 
-app.get('/api/health', (req, res) => { res.json({ status: 'OK', message: 'FUNDAMUFA - API funcionando - Dr. Jorge Charrasquiel' }); });
+app.get('/api/health', (req, res) => { res.json({ status: 'OK', message: 'FUNDAMUFA - API funcionando - Dr. Jorge Charrasquiel - FIX SIMPLE' }); });
 
 module.exports = app;

@@ -71,40 +71,7 @@ app.put('/api/auth/usuarios/:id', async (req, res) => { try { const { id } = req
 app.put('/api/auth/usuarios/:id/password', async (req, res) => { try { const { id } = req.params; const { passwordActual, passwordNueva } = req.body; if (!passwordNueva) return res.status(400).json({ error: 'La nueva contraseña es requerida' }); const user = await prisma.usuario.findUnique({ where: { id: parseInt(id) } }); if (!user) return res.status(404).json({ error: 'Usuario no encontrado' }); if (passwordActual) { const validPassword = await bcrypt.compare(passwordActual, user.password); if (!validPassword) return res.status(401).json({ error: 'Contraseña actual incorrecta' }); } const hashedPassword = await bcrypt.hash(passwordNueva, 10); await prisma.usuario.update({ where: { id: parseInt(id) }, data: { password: hashedPassword } }); res.json({ message: 'Contraseña actualizada correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al cambiar contraseña' }); } });
 app.delete('/api/auth/usuarios/:id', async (req, res) => { try { const count = await prisma.usuario.count(); if (count <= 1) return res.status(400).json({ error: 'No se puede eliminar el único usuario del sistema' }); await prisma.usuario.delete({ where: { id: parseInt(req.params.id) } }); res.json({ message: 'Usuario eliminado correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al eliminar usuario' }); } });
 // RESET TEMPORAL - BORRAR DESPUES
-// FIX DB TEMPORAL - BORRAR DESPUES
-app.get('/api/fix-db-temp-12345', async (req, res) => {
-  try {
-    const sqls = [
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "edad" INTEGER`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "tipoPago" TEXT DEFAULT 'pago'`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "referido" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "diagnostico" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "presionSistolica" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "presionDiastolica" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "temperatura" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "frecuenciaCardiaca" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "sistemas" JSONB`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "tipoPaciente" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "acompanante" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "acompananteTelefono" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "actitudPaciente" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "notasMedico" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "proximaCita" TIMESTAMP(3)`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "tipoAtencion" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "formaPago" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "valorConsulta" DOUBLE PRECISION`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "valorMedicamentos" DOUBLE PRECISION`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "detalleMedicamentos" TEXT`,
-      `ALTER TABLE "Historia" ADD COLUMN IF NOT EXISTS "valor" DOUBLE PRECISION`
-    ];
-    for (const s of sqls) {
-      await prisma.$executeRawUnsafe(s);
-    }
-    res.json({ ok: true, mensaje: "Base de datos arreglada, ya puede guardar historias" });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+
 // CLIENTES
 app.get('/api/clientes', authMiddleware, async (req, res) => { try { const { search } = req.query; let where = {}; if (search) where = { OR: [{ nombre: { contains: search, mode: 'insensitive' } }, { cedula: { contains: search, mode: 'insensitive' } }] }; const clientes = await prisma.cliente.findMany({ where, orderBy: { createdAt: 'desc' }, include: { _count: { select: { historias: true, formulas: true } } } }); res.json(clientes); } catch (e) { console.error(e); res.status(500).json({ error: 'Error al obtener clientes' }); } });
 app.get('/api/clientes/:id', authMiddleware, async (req, res) => { try { const cliente = await prisma.cliente.findUnique({ where: { id: parseInt(req.params.id) }, include: { historias: { orderBy: { fecha: 'desc' } }, formulas: { orderBy: { fecha: 'desc' }, include: { items: true } } } }); if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' }); res.json(cliente); } catch (e) { res.status(500).json({ error: 'Error al obtener cliente' }); } });

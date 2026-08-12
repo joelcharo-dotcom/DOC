@@ -10,10 +10,14 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('usuario');
-    
+
     if (token && savedUser) {
-      setUsuario(JSON.parse(savedUser));
-      // Verificar que el token sigue siendo válido
+      try {
+        setUsuario(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem('token');
+        localStorage.removeItem('usuario');
+      }
       api.get('/auth/me')
         .then(res => {
           setUsuario(res.data.usuario);

@@ -70,7 +70,27 @@ app.get('/api/auth/usuarios/:id', async (req, res) => { try { const usuario = aw
 app.put('/api/auth/usuarios/:id', async (req, res) => { try { const { id } = req.params; const { usuario, nombre } = req.body; if (usuario) { const existingUser = await prisma.usuario.findFirst({ where: { usuario, NOT: { id: parseInt(id) } } }); if (existingUser) return res.status(400).json({ error: 'El nombre de usuario ya está en uso' }); } const updatedUser = await prisma.usuario.update({ where: { id: parseInt(id) }, data: { ...(usuario && { usuario }), ...(nombre && { nombre }) }, select: { id: true, usuario: true, nombre: true } }); res.json(updatedUser); } catch (e) { res.status(500).json({ error: 'Error al actualizar usuario' }); } });
 app.put('/api/auth/usuarios/:id/password', async (req, res) => { try { const { id } = req.params; const { passwordActual, passwordNueva } = req.body; if (!passwordNueva) return res.status(400).json({ error: 'La nueva contraseña es requerida' }); const user = await prisma.usuario.findUnique({ where: { id: parseInt(id) } }); if (!user) return res.status(404).json({ error: 'Usuario no encontrado' }); if (passwordActual) { const validPassword = await bcrypt.compare(passwordActual, user.password); if (!validPassword) return res.status(401).json({ error: 'Contraseña actual incorrecta' }); } const hashedPassword = await bcrypt.hash(passwordNueva, 10); await prisma.usuario.update({ where: { id: parseInt(id) }, data: { password: hashedPassword } }); res.json({ message: 'Contraseña actualizada correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al cambiar contraseña' }); } });
 app.delete('/api/auth/usuarios/:id', async (req, res) => { try { const count = await prisma.usuario.count(); if (count <= 1) return res.status(400).json({ error: 'No se puede eliminar el único usuario del sistema' }); await prisma.usuario.delete({ where: { id: parseInt(req.params.id) } }); res.json({ message: 'Usuario eliminado correctamente' }); } catch (e) { res.status(500).json({ error: 'Error al eliminar usuario' }); } });
-
+// RESET TEMPORAL - BORRAR DESPUES
+app.get('/api/reset-admin-temp-12345', async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    let usuario = await prisma.usuario.findUnique({ where: { usuario: 'admin' } });
+    if (usuario) {
+      usuario = await prisma.usuario.update({
+        where: { usuario: 'admin' },
+        data: { password: hashedPassword, nombre: 'Admin' }
+      });
+    } else {
+      usuario = await prisma.usuario.create({
+        data: { usuario: 'admin', password: hashedPassword, nombre: 'Admin' }
+      });
+    }
+    res.json({ ok: true, mensaje: 'Admin reseteado', usuario: usuario.usuario });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // CLIENTES
 app.get('/api/clientes', authMiddleware, async (req, res) => { try { const { search } = req.query; let where = {}; if (search) where = { OR: [{ nombre: { contains: search, mode: 'insensitive' } }, { cedula: { contains: search, mode: 'insensitive' } }] }; const clientes = await prisma.cliente.findMany({ where, orderBy: { createdAt: 'desc' }, include: { _count: { select: { historias: true, formulas: true } } } }); res.json(clientes); } catch (e) { console.error(e); res.status(500).json({ error: 'Error al obtener clientes' }); } });
 app.get('/api/clientes/:id', authMiddleware, async (req, res) => { try { const cliente = await prisma.cliente.findUnique({ where: { id: parseInt(req.params.id) }, include: { historias: { orderBy: { fecha: 'desc' } }, formulas: { orderBy: { fecha: 'desc' }, include: { items: true } } } }); if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' }); res.json(cliente); } catch (e) { res.status(500).json({ error: 'Error al obtener cliente' }); } });

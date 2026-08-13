@@ -27,12 +27,13 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Rutas públicas */}
+          {/* Rutas públicas - Pacientes no necesitan login */}
           <Route path="/login" element={<Login />} />
           <Route path="/formula-externa" element={<FormulaExterna />} />
           <Route path="/agendar" element={<CitasPublica />} />
+          <Route path="/citas-publicas" element={<CitasPublica />} />
 
-          {/* Rutas protegidas */}
+          {/* Rutas protegidas - Solo Dr. Jorge */}
           <Route path="/" element={<ProtectedRoute><Layout><Inicio /></Layout></ProtectedRoute>} />
 
           {/* Clientes */}
@@ -64,7 +65,7 @@ function App() {
           <Route path="/facturas/nueva" element={<ProtectedRoute><Layout><FacturaForm /></Layout></ProtectedRoute>} />
           <Route path="/facturas/:id/editar" element={<ProtectedRoute><Layout><FacturaForm /></Layout></ProtectedRoute>} />
 
-          {/* Citas */}
+          {/* Citas Admin */}
           <Route path="/citas" element={<ProtectedRoute><Layout><Citas /></Layout></ProtectedRoute>} />
 
           {/* Ruta por defecto */}

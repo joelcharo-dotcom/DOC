@@ -8,7 +8,7 @@ const HORARIOS = [
 ];
 
 export default function CitasPublica() {
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = new Date().toISOString().split('T')[0];
   const [fechaSel, setFechaSel] = useState(hoy);
   const [citas, setCitas] = useState([]);
   const [selectedHora, setSelectedHora] = useState(null);
@@ -26,7 +26,6 @@ export default function CitasPublica() {
 
   useEffect(() => {
     cargarCitas();
-    // Se actualiza solo cada 5 segundos - para que se vea en PC y celular al mismo tiempo
     const intervalo = setInterval(cargarCitas, 5000);
     return () => clearInterval(intervalo);
   }, [fechaSel]);
@@ -71,9 +70,7 @@ export default function CitasPublica() {
             <p className="text-sm text-gray-600 mt-2">Hora</p><p className="font-black text-lg">{selectedHora}</p>
             <p className="text-sm text-gray-600 mt-2">Paciente</p><p className="font-bold">{form.nombre}</p>
           </div>
-          <p className="text-xs text-gray-500 mt-5">Llegue 10 min antes. Si no puede asistir, avise por WhatsApp.</p>
-          <button onClick={()=>{setEnviado(false); setSelectedHora(null); setForm({nombre:"",celular:"",motivo:""})}} className="w-full mt-4 bg-emerald-600 text-white py-3 rounded-xl font-bold">Agendar otra</button>
-          <a href="/" className="block mt-3 text-sm text-gray-500">Volver al inicio</a>
+          <button onClick={()=>{setEnviado(false); setSelectedHora(null); setForm({nombre:"",celular:"",motivo:""})}} className="w-full mt-6 bg-emerald-600 text-white py-3 rounded-xl font-bold">Agendar otra</button>
         </div>
       </div>
     );
@@ -86,7 +83,7 @@ export default function CitasPublica() {
           <div className="bg-gradient-to-r from-emerald-700 to-emerald-500 text-white p-6 text-center">
             <h1 className="text-2xl font-black">Dr. Jorge Charrasquiel</h1>
             <p className="opacity-90 text-sm mt-1">FUNDAMUFA - MEDICO ALTERNATIVO</p>
-            <p className="text-xs opacity-80 mt-2 bg-white/20 inline-block px-3 py-1 rounded-full">Agenda tu cita en línea</p>
+            <p className="text-xs opacity-80 mt-2 bg-white/20 inline-block px-3 py-1 rounded-full">Sincronizado PC y Celular cada 5s</p>
           </div>
           <div className="p-5">
             <label className="block text-xs font-bold text-gray-500 uppercase mb-2">📅 Elige el día</label>
@@ -96,35 +93,33 @@ export default function CitasPublica() {
               {HORARIOS.map(h=>{
                 const cita = getCita(h);
                 const ocupada = cita?.estado === 'ocupada' || cita?.estado === 'bloqueada';
-                const esLibre =!cita;
                 return (
-                  <button key={h} disabled={ocupada} onClick={()=>esLibre && setSelectedHora(h)}
-                    className={`rounded-xl p-3 text-center font-black text-sm border-2 transition active:scale-95
-                    ${ocupada? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed' : ''}
+                  <button key={h} disabled={ocupada} onClick={()=>!ocupada && setSelectedHora(h)}
+                    className={`rounded-xl p-3 text-center font-black text-sm border-2 transition
+                    ${ocupada? 'bg-gray-200 border-gray-300 text-gray-500' : ''}
                     ${!ocupada && selectedHora===h? 'bg-emerald-600 border-emerald-700 text-white shadow-lg scale-105' : ''}
-                    ${esLibre && selectedHora!==h? 'bg-white border-emerald-300 text-emerald-800 shadow-sm hover:bg-emerald-50' : ''}`}>
+                    ${!ocupada && selectedHora!==h? 'bg-white border-emerald-300 text-emerald-800' : ''}`}>
                     {h}
-                    <div className="text- font-normal mt-1">{ocupada? 'Ocupada' : selectedHora===h? 'Seleccionada' : 'Libre'}</div>
+                    <div className="text-[9px] font-normal mt-1">{ocupada? 'Ocupada' : selectedHora===h? 'Seleccionada' : 'Libre'}</div>
                   </button>
                 );
               })}
             </div>
             {selectedHora && (
-              <div className="mt-6 bg-gray-50 rounded-2xl p-5 border-2 border-emerald-200 animate-in">
-                <h3 className="font-black text-base mb-1">📝 Tus datos para {selectedHora} del {fechaSel}</h3>
+              <div className="mt-6 bg-gray-50 rounded-2xl p-5 border-2 border-emerald-200">
+                <h3 className="font-black text-base">📝 Tus datos para {selectedHora}</h3>
                 <div className="space-y-3 mt-4">
                   <input placeholder="Nombre completo *" value={form.nombre} onChange={(e)=>setForm({...form, nombre:e.target.value})} className="w-full border rounded-xl p-3"/>
                   <input placeholder="Celular / WhatsApp *" value={form.celular} onChange={(e)=>setForm({...form, celular:e.target.value})} className="w-full border rounded-xl p-3"/>
-                  <input placeholder="Motivo de consulta (opcional)" value={form.motivo} onChange={(e)=>setForm({...form, motivo:e.target.value})} className="w-full border rounded-xl p-3"/>
+                  <input placeholder="Motivo (opcional)" value={form.motivo} onChange={(e)=>setForm({...form, motivo:e.target.value})} className="w-full border rounded-xl p-3"/>
                 </div>
-                <button onClick={agendar} disabled={cargando} className="w-full mt-5 bg-emerald-600 text-white py-4 rounded-xl font-black text-base disabled:bg-gray-400">
-                  {cargando? 'Guardando...' : `Confirmar cita ${selectedHora}`}
+                <button onClick={agendar} disabled={cargando} className="w-full mt-5 bg-emerald-600 text-white py-4 rounded-xl font-black">
+                  {cargando? 'Guardando...' : `Confirmar ${selectedHora}`}
                 </button>
               </div>
             )}
           </div>
         </div>
-        <p className="text-center text- text-gray-400 mt-4">📍 FUNDAMUFA - Dr. Jorge Charrasquiel - MEDICO ALTERNATIVO</p>
       </div>
     </div>
   );

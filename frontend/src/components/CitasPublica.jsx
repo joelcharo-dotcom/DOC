@@ -15,13 +15,17 @@ export default function CitasPublica() {
   const [form, setForm] = useState({ nombre: "", celular: "", motivo: "" });
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [errorDebug, setErrorDebug] = useState("");
 
   const cargarCitas = async () => {
     try {
       const r = await fetch(`/api/citas-publicas?fecha=${fechaSel}`);
       const data = await r.json();
       if (Array.isArray(data)) setCitas(data);
-    } catch {}
+      else setCitas([]);
+    } catch (e) {
+      console.log("Error cargar", e);
+    }
   };
 
   useEffect(() => {
@@ -30,11 +34,16 @@ export default function CitasPublica() {
     return () => clearInterval(intervalo);
   }, [fechaSel]);
 
-  const getCita = (hora) => citas.find(c=>c.fecha===fechaSel && c.hora===hora);
+  // FIX: solo comparar por hora, ya que el backend filtra por fecha
+  const getCita = (hora) => citas.find(c=>c.hora===hora);
 
   const agendar = async () => {
-    if(!form.nombre ||!form.celular) return alert("Nombre y celular obligatorios");
+    if(!form.nombre.trim() || !form.celular.trim()) {
+      alert("Nombre y celular obligatorios");
+      return;
+    }
     setCargando(true);
+    setErrorDebug("");
     try {
       const res = await fetch('/api/citas-publicas', {
         method: 'POST',
@@ -42,17 +51,24 @@ export default function CitasPublica() {
         body: JSON.stringify({
           fecha: fechaSel,
           hora: selectedHora,
-          nombre: form.nombre,
-          celular: form.celular,
-          motivo: form.motivo
+          nombre: form.nombre.trim(),
+          celular: form.celular.trim(),
+          cedula: "",
+          motivo: form.motivo.trim(),
+          estado: "ocupada"
         })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { error: text }; }
+      if (!res.ok) {
+        throw new Error((data.error || "Error al agendar") + (data.details ? " - " + data.details : ""));
+      }
       setEnviado(true);
       cargarCitas();
     } catch(e) {
-      alert(e.message);
+      setErrorDebug(e.message);
+      alert("DOC-TAU-ONE.VERCEL.APP DICE: " + e.message);
     } finally {
       setCargando(false);
     }
@@ -70,7 +86,7 @@ export default function CitasPublica() {
             <p className="text-sm text-gray-600 mt-2">Hora</p><p className="font-black text-lg">{selectedHora}</p>
             <p className="text-sm text-gray-600 mt-2">Paciente</p><p className="font-bold">{form.nombre}</p>
           </div>
-          <button onClick={()=>{setEnviado(false); setSelectedHora(null); setForm({nombre:"",celular:"",motivo:""})}} className="w-full mt-6 bg-emerald-600 text-white py-3 rounded-xl font-bold">Agendar otra</button>
+          <button onClick={()=>{setEnviado(false); setSelectedHora(null); setForm({nombre:"",celular:"",motivo:""}); setErrorDebug("");}} className="w-full mt-6 bg-emerald-600 text-white py-3 rounded-xl font-bold">Agendar otra</button>
         </div>
       </div>
     );
@@ -100,11 +116,12 @@ export default function CitasPublica() {
                     ${!ocupada && selectedHora===h? 'bg-emerald-600 border-emerald-700 text-white shadow-lg scale-105' : ''}
                     ${!ocupada && selectedHora!==h? 'bg-white border-emerald-300 text-emerald-800' : ''}`}>
                     {h}
-                    <div className="text-[9px] font-normal mt-1">{ocupada? 'Ocupada' : selectedHora===h? 'Seleccionada' : 'Libre'}</div>
+                    <div className="text-[9px] font-normal mt-1">{ocupada? (cita?.nombre?.substring(0,10) || 'Ocupada') : selectedHora===h? 'Seleccionada' : 'Libre'}</div>
                   </button>
                 );
               })}
             </div>
+            {errorDebug && <p className="text-red-600 text-xs mt-3 bg-red-50 p-2 rounded">Error: {errorDebug}</p>}
             {selectedHora && (
               <div className="mt-6 bg-gray-50 rounded-2xl p-5 border-2 border-emerald-200">
                 <h3 className="font-black text-base">📝 Tus datos para {selectedHora}</h3>

@@ -14,7 +14,7 @@ app.get('/api/health', (req, res) => {
 
 app.post('/api/login', async (req, res) => {
   const { usuario, password } = req.body;
-  if (usuario === 'admin' && password === 'admin123') {
+  if (usuario === 'admin' && password === 'fundamufa2026') {
     return res.json({ token: 'fake-token', usuario: 'admin', rol: 'admin' });
   }
   res.status(401).json({ error: 'Credenciales inválidas' });
@@ -44,6 +44,7 @@ app.get('/api/citas', async (req, res) => {
 
 app.get('/api/citas-publicas', async (req, res) => {
   try {
+    try { await prisma.$executeRawUnsafe('DEALLOCATE ALL'); } catch(e) {}
     const { fecha } = req.query;
     if (!fecha) return res.json([]);
     const inicioDia = new Date(fecha);
@@ -102,6 +103,8 @@ app.post('/api/citas', async (req, res) => {
 
 app.post('/api/citas-publicas', async (req, res) => {
   try {
+    // Fix cached plan error after table recreate
+    try { await prisma.$executeRawUnsafe('DEALLOCATE ALL'); } catch(e) {}
     const { fecha, hora, nombre, cedula, celular, motivo, estado } = req.body;
     if (!fecha || !hora || !nombre) {
       return res.status(400).json({ error: 'Faltan datos: fecha, hora y nombre son obligatorios' });

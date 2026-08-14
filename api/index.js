@@ -96,6 +96,7 @@ app.get('/api/citas', auth, async (req, res) => {
 
 // HISTORIAS
 app.get('/api/historias', auth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
     let data = [];
@@ -106,6 +107,7 @@ app.get('/api/historias', auth, async (req, res) => {
 
 // FORMULAS - CORREGIDO CON CLIENTE E ITEMS
 app.get('/api/formulas', auth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
     let data = [];
@@ -127,6 +129,7 @@ app.get('/api/formulas', auth, async (req, res) => {
 
 // FACTURAS
 app.get('/api/facturas', auth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
     let data = [];
@@ -135,5 +138,5 @@ app.get('/api/facturas', auth, async (req, res) => {
   } catch { res.json([]); }
 });
 
-app.get('/api/health', (req, res) => res.json({ ok: true, version: 'FORMULAS-CON-ITEMS-Y-CLIENTE', auth: 'admin/fundamufa2026' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, version: 'FORMULAS-SIN-CACHE-V3', auth: 'admin/fundamufa2026' }));
 module.exports = app;

@@ -9,13 +9,8 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'fundamufa_secret_2026';
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Manejar FormData con foto
-let uploadAny;
-try { const multer = require('multer'); uploadAny = multer().any(); } catch { uploadAny = (req,res,next)=>next(); }
-app.use(uploadAny);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 function handleLogin(usuario, password) {
   if (usuario === 'admin' && password === 'fundamufa2026') return { usuario: { id: 'admin', usuario: 'admin', nombre: 'Administrador' } };
@@ -24,17 +19,15 @@ function handleLogin(usuario, password) {
 }
 
 app.post('/api/login', (req, res) => {
-  const b = req.body || {};
-  const { usuario, password } = b;
-  const r = handleLogin(usuario, password);
+  const body = req.body || {};
+  const r = handleLogin(body.usuario, body.password);
   if (!r) return res.status(401).json({ error: 'Credenciales inválidas' });
   const token = jwt.sign({ usuario: r.usuario }, JWT_SECRET, { expiresIn: '8h' });
   return res.json({ token, usuario: r.usuario });
 });
 app.post('/api/auth/login', (req, res) => {
-  const b = req.body || {};
-  const { usuario, password } = b;
-  const r = handleLogin(usuario, password);
+  const body = req.body || {};
+  const r = handleLogin(body.usuario, body.password);
   if (!r) return res.status(401).json({ error: 'Credenciales inválidas' });
   const token = jwt.sign({ usuario: r.usuario }, JWT_SECRET, { expiresIn: '8h' });
   return res.json({ token, usuario: r.usuario });
@@ -62,12 +55,11 @@ async function safeFind(modelNames, orderBy, include) {
         const data = await prisma[name].findMany({ orderBy, include }).catch(async () => await prisma[name].findMany({ orderBy }));
         return data;
       }
-    } catch (e) { console.log('safeFind', name, e.message); }
+    } catch (e) {}
   }
   return [];
 }
 
-// CLIENTES GET
 app.get('/api/pacientes', auth, async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const data = await safeFind(['cliente','Cliente','paciente','Paciente'], { createdAt: 'desc' });
@@ -79,35 +71,23 @@ app.get('/api/clientes', auth, async (req, res) => {
   res.json(data);
 });
 
-// CLIENTES POST - V6 SEGURO, NO SE CAE SI req.body ES UNDEFINED
 app.post('/api/pacientes', auth, async (req, res) => {
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
-    const body = req.body || {};
-    const nombreFinal = body.nombre || body.nombreCompleto || body.nombre_completo || body.nombreCompletoInput || 'Sin nombre';
-    const cedulaFinal = body.cedula || body.documento || body.cedulaInput || '';
-    const telefonoFinal = body.telefono || body.tel || '';
-    const direccionFinal = body.direccion || '';
-    const emailFinal = body.email || body.correo || '';
-
-    if (!nombreFinal || nombreFinal === 'Sin nombre') {
-      // intentar con cualquier campo
-      console.log('BODY RECIBIDO:', body);
-    }
-
+    const b = req.body || {};
+    const nombreFinal = b.nombre || b.nombreCompleto || b.nombre_completo || 'Sin nombre';
+    const cedulaFinal = b.cedula || b.documento || '';
+    const telefonoFinal = b.telefono || '';
+    const direccionFinal = b.direccion || '';
+    const emailFinal = b.email || b.correo || '';
     let created;
     if (prisma.cliente) {
-      created = await prisma.cliente.create({
-        data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal), email: String(emailFinal) }
-      });
+      created = await prisma.cliente.create({ data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal), email: String(emailFinal) } });
     } else if (prisma.paciente) {
-      created = await prisma.paciente.create({
-        data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal) }
-      });
+      created = await prisma.paciente.create({ data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal) } });
     }
     res.json(created);
   } catch (e) {
-    console.log('POST pacientes error', e);
     res.status(500).json({ error: 'Error al guardar cliente: ' + e.message });
   }
 });
@@ -115,55 +95,35 @@ app.post('/api/pacientes', auth, async (req, res) => {
 app.post('/api/clientes', auth, async (req, res) => {
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
-    const body = req.body || {};
-    const nombreFinal = body.nombre || body.nombreCompleto || body.nombre_completo || 'Sin nombre';
-    const cedulaFinal = body.cedula || body.documento || '';
-    const telefonoFinal = body.telefono || '';
-    const direccionFinal = body.direccion || '';
-    const emailFinal = body.email || body.correo || '';
-
+    const b = req.body || {};
+    const nombreFinal = b.nombre || b.nombreCompleto || b.nombre_completo || 'Sin nombre';
+    const cedulaFinal = b.cedula || b.documento || '';
+    const telefonoFinal = b.telefono || '';
+    const direccionFinal = b.direccion || '';
+    const emailFinal = b.email || b.correo || '';
     let created;
     if (prisma.cliente) {
-      created = await prisma.cliente.create({
-        data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal), email: String(emailFinal) }
-      });
+      created = await prisma.cliente.create({ data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal), email: String(emailFinal) } });
     } else if (prisma.paciente) {
-      created = await prisma.paciente.create({
-        data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal) }
-      });
+      created = await prisma.paciente.create({ data: { nombre: String(nombreFinal), cedula: String(cedulaFinal), telefono: String(telefonoFinal), direccion: String(direccionFinal) } });
     }
     res.json(created);
   } catch (e) {
-    console.log('POST clientes error', e);
     res.status(500).json({ error: 'Error al guardar cliente: ' + e.message });
   }
 });
 
-// PUT CLIENTES
 app.put('/api/pacientes/:id', auth, async (req, res) => {
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
-    const { id } = req.params;
     const data = req.body || {};
     let updated;
-    if (prisma.cliente) updated = await prisma.cliente.update({ where: { id }, data });
-    else if (prisma.paciente) updated = await prisma.paciente.update({ where: { id }, data });
-    res.json(updated);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-app.put('/api/clientes/:id', auth, async (req, res) => {
-  try {
-    await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
-    const { id } = req.params;
-    const data = req.body || {};
-    let updated;
-    if (prisma.cliente) updated = await prisma.cliente.update({ where: { id }, data });
-    else if (prisma.paciente) updated = await prisma.paciente.update({ where: { id }, data });
+    if (prisma.cliente) updated = await prisma.cliente.update({ where: { id: req.params.id }, data });
+    else if (prisma.paciente) updated = await prisma.paciente.update({ where: { id: req.params.id }, data });
     res.json(updated);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// AGENDA / CITAS
 app.get('/api/agenda', auth, async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
@@ -184,8 +144,6 @@ app.get('/api/citas', auth, async (req, res) => {
     res.json(data);
   } catch { res.json([]); }
 });
-
-// HISTORIAS
 app.get('/api/historias', auth, async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
@@ -195,21 +153,15 @@ app.get('/api/historias', auth, async (req, res) => {
     res.json(data);
   } catch { res.json([]); }
 });
-
-// FORMULAS
 app.get('/api/formulas', auth, async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
     await prisma.$executeRawUnsafe('DEALLOCATE ALL').catch(()=>{});
     let data = [];
-    if (prisma.formula) {
-      data = await prisma.formula.findMany({ include: { cliente: true, items: true }, orderBy: { createdAt: 'desc' } }).catch(async () => await prisma.formula.findMany({ orderBy: { createdAt: 'desc' } }));
-    }
+    if (prisma.formula) data = await prisma.formula.findMany({ include: { cliente: true, items: true }, orderBy: { createdAt: 'desc' } }).catch(async () => await prisma.formula.findMany({ orderBy: { createdAt: 'desc' } }));
     res.json(data);
-  } catch (e) { console.log('formulas error', e.message); res.json([]); }
+  } catch { res.json([]); }
 });
-
-// FACTURAS
 app.get('/api/facturas', auth, async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
@@ -220,5 +172,5 @@ app.get('/api/facturas', auth, async (req, res) => {
   } catch { res.json([]); }
 });
 
-app.get('/api/health', (req, res) => res.json({ ok: true, version: 'FINAL-V6-GUARDA-SEGURO', auth: 'admin/fundamufa2026' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, version: 'V7-BLANCO-FIX', auth: 'admin/fundamufa2026' }));
 module.exports = app;

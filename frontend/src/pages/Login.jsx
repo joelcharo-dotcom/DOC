@@ -104,7 +104,7 @@ export default function Login() {
 
           <div className="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
             <p>Credenciales de prueba:</p>
-            <p className="font-mono text-gray-700">admin / admin123</p>
+            <p className="font-mono text-gray-700">admin / fundamufa2026</p>
           </div>
         </div>
 

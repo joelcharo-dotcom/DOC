@@ -54,7 +54,7 @@ export default function ImprimirModal({ tipo, data, onClose, soloVista = false }
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Pagina web: www.funhuespedmujeryflia.org</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Carrera 50 N.52-89 Avenida Palace Edificio Nutibara Express</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Oficina 722 - Séptimo Piso</p>
-                <p style={{ fontSize: '10px', margin: '2px 0' }}>Telefonos 313 666 74 79 / 320 633 22 33</p>
+                <p style={{ fontSize: '10px', margin: '2px 0' }}>Celular 313 666 74 79</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Medellin - Colombia</p>
               </div>
 
@@ -172,7 +172,7 @@ export default function ImprimirModal({ tipo, data, onClose, soloVista = false }
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Pagina web: www.funhuespedmujeryflia.org</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Carrera 50 N.52-89 Avenida Palace Edificio Nutibara Express</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Oficina 722 - Séptimo Piso</p>
-                <p style={{ fontSize: '10px', margin: '2px 0' }}>Telefonos 313 666 74 79 / 320 633 22 33</p>
+                <p style={{ fontSize: '10px', margin: '2px 0' }}>Celular 313 666 74 79</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Medellin - Colombia</p>
               </div>
 
@@ -336,7 +336,7 @@ export default function ImprimirModal({ tipo, data, onClose, soloVista = false }
               <p style={{ margin: '0', fontSize: '12px' }}>CARRERA 50 ( PALACE ) NRO 52 - 89  OFICINA 722 SÉPTIMO PISO MEDELLIN</p>
               <p style={{ margin: '0', fontSize: '12px' }}>ANTIOQUIA</p>
               <p style={{ margin: '10px 0 0 0', fontSize: '12px' }}>MEDICO JORGE CHARRASQUIEL</p>
-              <p style={{ margin: '0', fontSize: '12px' }}>3136667479 - 3206332233</p>
+              <p style={{ margin: '0', fontSize: '12px' }}>Celular 3136667479</p>
             </div>
 
             {/* Facturar a */}
@@ -433,7 +433,7 @@ export default function ImprimirModal({ tipo, data, onClose, soloVista = false }
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Pagina web: www.funhuespedmujeryflia.org</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Carrera 50 N.52-89 Avenida Palace Edificio Nutibara Express</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Oficina 722 - Séptimo Piso</p>
-                <p style={{ fontSize: '10px', margin: '2px 0' }}>Telefonos 313 666 74 79 / 320 633 22 33</p>
+                <p style={{ fontSize: '10px', margin: '2px 0' }}>Celular 313 666 74 79</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Medellin - Colombia</p>
               </div>
 

@@ -226,7 +226,7 @@ export default function FormulaExterna() {
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Pagina web: www.funhuespedmujeryflia.org</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Carrera 50 N.52-89 Avenida Palace Edificio Nutibara Express</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Oficina 722 - Séptimo Piso</p>
-                <p style={{ fontSize: '10px', margin: '2px 0' }}>Telefonos 313 666 74 79 / 320 633 22 33</p>
+                <p style={{ fontSize: '10px', margin: '2px 0' }}>Celular 313 666 74 79</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Medellin - Colombia</p>
               </div>
               <div style={{ textAlign: 'right', minWidth: '80px' }}>

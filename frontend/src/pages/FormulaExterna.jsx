@@ -217,8 +217,8 @@ export default function FormulaExterna() {
           <div className="print-content font-serif" style={{ fontSize: '12px', maxWidth: '800px', margin: '0 auto' }}>
             {/* Encabezado */}
             <div style={{ display: 'flex', alignItems: 'flex-start', borderBottom: '2px solid #8B4513', paddingBottom: '10px', marginBottom: '15px' }}>
-              <div style={{ width: '150px', marginRight: '10px', flexShrink: 0 }}>
-                <img src="/logo-medicina-alternativa.png" alt="Medicina Alternativa - MD. Jorge Charrasquiel" style={{ width: '145px', height: 'auto' }} />
+              <div style={{ width: '180px', marginRight: '0px', flexShrink: 0 }}>
+                <img src="/logo-medicina-alternativa.png" alt="Medicina Alternativa - MD. Jorge Charrasquiel" style={{ width: '180px', height: 'auto' }} />
               </div>
               <div style={{ flex: '0 1 auto', textAlign: 'center' }}>
                 <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#8B0000', margin: '0 0 3px 0' }}>

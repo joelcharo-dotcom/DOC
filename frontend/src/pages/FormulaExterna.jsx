@@ -210,10 +210,10 @@ export default function FormulaExterna() {
           <div className="print-content font-serif" style={{ fontSize: '12px', maxWidth: '800px', margin: '0 auto' }}>
             {/* Encabezado */}
             <div style={{ display: 'flex', alignItems: 'flex-start', borderBottom: '2px solid #8B4513', paddingBottom: '10px', marginBottom: '15px' }}>
-              <div style={{ width: '100px', marginRight: '15px' }}>
-                <img src="/logo-medicina-alternativa.png" alt="Medicina Alternativa - MD. Jorge Charrasquiel" style={{ width: '90px', height: 'auto' }} />
+              <div style={{ width: '150px', marginRight: '10px', flexShrink: 0 }}>
+                <img src="/logo-medicina-alternativa.png" alt="Medicina Alternativa - MD. Jorge Charrasquiel" style={{ width: '145px', height: 'auto' }} />
               </div>
-              <div style={{ flex: 1, textAlign: 'center' }}>
+              <div style={{ flex: '0 1 auto', textAlign: 'center' }}>
                 <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#8B0000', margin: '0 0 3px 0' }}>
                   FUNDACION HUESPED MUJER Y FAMILIA
                 </h1>
@@ -229,7 +229,7 @@ export default function FormulaExterna() {
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Celular 313 666 74 79</p>
                 <p style={{ fontSize: '10px', margin: '2px 0' }}>Medellin - Colombia</p>
               </div>
-              <div style={{ textAlign: 'right', minWidth: '80px' }}>
+              <div style={{ textAlign: 'right', minWidth: '80px', marginLeft: 'auto' }}>
                 <p style={{ fontSize: '11px', margin: '0' }}>No.</p>
                 <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#8B0000' }}>{getNumero()}</p>
               </div>

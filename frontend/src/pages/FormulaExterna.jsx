@@ -46,10 +46,17 @@ export default function FormulaExterna() {
     return String(Math.floor(Math.random() * 999999)).padStart(6, '0');
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printContent = printRef.current;
     const originalContents = document.body.innerHTML;
     document.body.innerHTML = printContent.innerHTML;
+    // Esperar a que carguen las imágenes (logo) antes de imprimir
+    const imgs = Array.from(document.body.querySelectorAll('img'));
+    await Promise.all(imgs.map((img) =>
+      img.complete && img.naturalWidth
+        ? Promise.resolve()
+        : new Promise((res) => { img.onload = res; img.onerror = res; setTimeout(res, 3000); })
+    ));
     window.print();
     document.body.innerHTML = originalContents;
     window.location.reload();

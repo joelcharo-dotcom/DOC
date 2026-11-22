@@ -211,7 +211,7 @@ export default function FormulaExterna() {
             {/* Encabezado */}
             <div style={{ display: 'flex', alignItems: 'flex-start', borderBottom: '2px solid #8B4513', paddingBottom: '10px', marginBottom: '15px' }}>
               <div style={{ width: '100px', marginRight: '15px' }}>
-                <img src="/logoo.png" alt="FUNDAMUFA" style={{ width: '90px', height: 'auto' }} />
+                <img src="/logo-medicina-alternativa.png" alt="Medicina Alternativa - MD. Jorge Charrasquiel" style={{ width: '90px', height: 'auto' }} />
               </div>
               <div style={{ flex: 1, textAlign: 'center' }}>
                 <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#8B0000', margin: '0 0 3px 0' }}>

@@ -104,6 +104,12 @@ body {
     max-width: 80px !important;
     height: auto !important;
   }
+
+  /* Logo grande de la Fórmula Externa */
+  .print-content img.logo-formula-externa {
+    max-width: 180px !important;
+    width: 180px !important;
+  }
   
   .print-content table {
     width: 100%;
